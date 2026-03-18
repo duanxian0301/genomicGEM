@@ -1,0 +1,11 @@
+*.sumstats.gz
+*.log
+*.tar.gz
+
+r_lib_fix/
+step13_native_ldsc_work/
+step13_native_ldsc_validation/
+
+debug_*.R
+tmp_*.R
+wsl_*smoketest.R
