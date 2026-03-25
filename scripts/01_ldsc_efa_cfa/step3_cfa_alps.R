@@ -1,5 +1,4 @@
 library(GenomicSEM)
-library(lavaan)
 library(data.table)
 
 gwas_dir <- "D:/文章/GS/GWAS"
@@ -16,7 +15,7 @@ if (!all(file.exists(traits))) {
   stop("Missing .sumstats.gz files for one or more traits.")
 }
 
-# Stable 2-factor CFA model derived from the EFA step.
+# Best-fitting unconstrained 2-factor model from the EFA/model-search stage.
 cfa_model <- "
 F1 =~ aALPS + Left_ALPS + Right_ALPS
 F2 =~ aALPS + mALPS + pALPS
@@ -40,35 +39,27 @@ run_ldsc <- function(select_mode = NULL, log_name) {
   do.call(ldsc, args)
 }
 
-fit_lavaan_cfa <- function(covstruc, label) {
-  S <- as.matrix(covstruc[[2]])
-  rownames(S) <- colnames(S)
-
-  fit <- sem(
+fit_usermodel_cfa <- function(covstruc, label) {
+  fit <- usermodel(
+    covstruc = covstruc,
+    estimation = "DWLS",
     model = cfa_model,
-    sample.cov = S,
-    estimator = "ML",
-    sample.nobs = 200,
+    CFIcalc = TRUE,
     std.lv = TRUE,
-    sample.cov.rescale = FALSE
+    imp_cov = FALSE
   )
 
   saveRDS(fit, file.path(output_dir, paste0(label, "_fit.rds")))
+  fwrite(as.data.frame(fit$results), file.path(output_dir, paste0(label, "_results.tsv")), sep = "\t")
 
-  pe <- parameterEstimates(fit, standardized = FALSE)
-  ss <- standardizedSolution(fit)
-  merge_key <- c("lhs", "op", "rhs")
-  pe2 <- merge(pe, ss[, c(merge_key, "est.std")], by = merge_key, all.x = TRUE)
-  fwrite(pe2, file.path(output_dir, paste0(label, "_parameters.tsv")), sep = "\t")
-
+  mf <- fit$modelfit
   fit_summary <- data.frame(
     analysis = label,
-    chisq = fitMeasures(fit, "chisq"),
-    df = fitMeasures(fit, "df"),
-    p_chisq = fitMeasures(fit, "pvalue"),
-    cfi = fitMeasures(fit, "cfi"),
-    srmr = fitMeasures(fit, "srmr"),
-    aic = fitMeasures(fit, "aic")
+    chisq = if ("chisq" %in% names(mf)) as.numeric(mf[["chisq"]]) else NA_real_,
+    df = if ("df" %in% names(mf)) as.numeric(mf[["df"]]) else NA_real_,
+    p_chisq = if ("p_chisq" %in% names(mf)) as.numeric(mf[["p_chisq"]]) else NA_real_,
+    cfi = if ("CFI" %in% names(mf)) as.numeric(mf[["CFI"]]) else NA_real_,
+    srmr = if ("SRMR" %in% names(mf)) as.numeric(mf[["SRMR"]]) else NA_real_
   )
   fwrite(fit_summary, file.path(output_dir, paste0(label, "_fit.tsv")), sep = "\t")
 
@@ -89,11 +80,11 @@ LDSCoutput_all <- run_ldsc(
 )
 saveRDS(LDSCoutput_all, file.path(output_dir, "ALPS5_ALL_CFA_ldsc.rds"))
 
-message("Running lavaan ML CFA on EVEN chromosomes...")
-even_out <- fit_lavaan_cfa(LDSCoutput_even, "ALPS5_EVEN_2factor_CFA")
+message("Running GenomicSEM usermodel CFA on EVEN chromosomes...")
+even_out <- fit_usermodel_cfa(LDSCoutput_even, "ALPS5_EVEN_2factor_CFA")
 
-message("Running lavaan ML CFA on all autosomes...")
-all_out <- fit_lavaan_cfa(LDSCoutput_all, "ALPS5_ALL_2factor_CFA")
+message("Running GenomicSEM usermodel CFA on all autosomes...")
+all_out <- fit_usermodel_cfa(LDSCoutput_all, "ALPS5_ALL_2factor_CFA")
 
 summary_table <- rbind(even_out$fit_summary, all_out$fit_summary)
 fwrite(summary_table, file.path(output_dir, "ALPS5_2factor_CFA_fit_summary.tsv"), sep = "\t")
