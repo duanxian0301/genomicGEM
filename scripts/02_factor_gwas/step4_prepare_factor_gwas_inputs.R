@@ -31,7 +31,9 @@ sumstats_obj <- sumstats(
   ref = ref_file,
   trait.names = trait_names,
   se.logit = rep(FALSE, length(files)),
-  OLS = rep(FALSE, length(files)),
+  # ALPS traits are continuous traits analyzed with linear regression / linear additive models.
+  # Per the GenomicSEM manual, these should be treated as OLS/LMM inputs.
+  OLS = rep(TRUE, length(files)),
   linprob = rep(FALSE, length(files)),
   N = rep(NA, length(files)),
   betas = NULL,

@@ -19,6 +19,7 @@ The final workflow includes:
 3. exploring and refining factor structure with EFA and CFA
 4. generating native WSL factor GWAS results for `F1` and `F2`
 5. validating the resulting factor GWAS with LDSC
+6. extracting and clumping `Q_SNP` signals for factor-specific heterogeneity follow-up
 
 ## Repository layout
 
@@ -42,25 +43,35 @@ The final workflow includes:
 2. `scripts/01_ldsc_efa_cfa/step2_efa_alps.R`
    Runs EFA and factor-number selection.
 3. `scripts/01_ldsc_efa_cfa/step3_cfa_alps.R`
-   Runs the initial CFA evaluation.
+   Runs the initial exploratory CFA evaluation.
 4. `scripts/01_ldsc_efa_cfa/step3b_cfa_model_search.R`
    Explores alternative CFA structures.
 5. `scripts/01_ldsc_efa_cfa/step3c_cfa_constrained_search.R`
    Searches constrained CFA variants.
 6. `scripts/01_ldsc_efa_cfa/step3d_cfa_refined_final.R`
-   Finalizes the refined CFA model.
-7. `scripts/02_factor_gwas/step4_prepare_factor_gwas_inputs.R`
+   Finalizes the exploratory refined CFA model.
+7. `scripts/01_ldsc_efa_cfa/step3f_cfa_usermodel_native_wsl.R`
+   Re-runs formal CFA/model comparison in native WSL via `GenomicSEM::usermodel()`.
+8. `scripts/02_factor_gwas/step4_prepare_factor_gwas_inputs.R`
    Prepares chunked factor GWAS inputs.
-8. `docs/step11_wsl_native_environment.md`
+9. `scripts/02_factor_gwas/step4b_ols_sensitivity_mini_compare.R`
+   Runs a mini sensitivity comparison of `OLS = FALSE` vs `OLS = TRUE` factor-GWAS input processing.
+10. `docs/step11_wsl_native_environment.md`
    Documents the working native WSL GenomicSEM environment.
-9. `scripts/02_factor_gwas/step11_run_factor_gwas_native_wsl.R`
+11. `scripts/02_factor_gwas/step11_run_factor_gwas_native_wsl.R`
    Runs the native WSL factor GWAS.
-10. `scripts/02_factor_gwas/step11b_merge_native_factor_gwas_results.R`
+12. `scripts/02_factor_gwas/step11b_merge_native_factor_gwas_results.R`
     Merges native chunked factor GWAS outputs.
-11. `scripts/02_factor_gwas/step12_export_native_standard_factor_gwas.R`
+13. `scripts/02_factor_gwas/step12_export_native_standard_factor_gwas.R`
     Exports standardized `txt` files for `F1` and `F2`.
-12. `scripts/03_validation/step13_ldsc_native_factor_validation.R`
+14. `scripts/03_validation/step13_ldsc_native_factor_validation.R`
     Runs LDSC validation on the native rerun outputs.
+15. `scripts/03_validation/step26_extract_qsnp_and_overlap.py`
+    Extracts factor-specific `Q_SNP` result tables and overlap summaries.
+16. `scripts/03_validation/step27_qsnp_clump_and_plots.py`
+    Performs PLINK clumping for factor and `Q_SNP` signals and generates Manhattan/QQ plots.
+17. `scripts/03_validation/step28_rebuild_supplement_with_qsnp.py`
+    Rebuilds supplementary tables with the `Q_SNP` summaries and clumped lead loci.
 
 ## Utility launchers
 
@@ -91,3 +102,6 @@ Standardized factor GWAS exports also follow the same layout for downstream tool
 - This repository tracks scripts and lightweight documentation only.
 - Large generated artifacts, temporary debug scripts, WSL scratch folders, and failed patched attempts are excluded by `.gitignore`.
 - Native WSL reruns were retained because they produced LDSC-valid factor GWAS outputs, whereas earlier patched Windows attempts did not.
+- For formal CFA/model-fit reporting, prefer the `usermodel()` workflow in `step3f_cfa_usermodel_native_wsl.R`.
+- The earlier `lavaan::sem(sample.nobs = 200)` scripts should be treated as exploratory model-search helpers, not as the primary confirmatory fit framework.
+- ALPS factor-GWAS input preparation should use `OLS = TRUE` because the source ALPS GWAS were continuous traits analyzed with linear models.
