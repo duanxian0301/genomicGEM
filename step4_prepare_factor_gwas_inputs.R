@@ -31,7 +31,7 @@ sumstats_obj <- sumstats(
   ref = ref_file,
   trait.names = trait_names,
   se.logit = rep(FALSE, length(files)),
-  OLS = rep(FALSE, length(files)),
+  OLS = rep(TURE, length(files)),
   linprob = rep(FALSE, length(files)),
   N = rep(NA, length(files)),
   betas = NULL,
