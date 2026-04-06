@@ -9,3 +9,13 @@ step13_native_ldsc_validation/
 debug_*.R
 tmp_*.R
 wsl_*smoketest.R
+__pycache__/
+*.pyc
+tmp_smr_*/
+postgwas_*_work/
+step14_bivariate_ldsc_work/
+step14_bivariate_ldsc_validation/
+step17_ndd_ldsc_work/
+step17_ndd_ldsc_validation/
+step22_ndd_ldsc_work/
+step22_ndd_ldsc_validation/

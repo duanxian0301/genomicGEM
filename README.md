@@ -29,6 +29,8 @@ The final workflow includes:
   Factor GWAS input preparation, native WSL execution, chunk merging, and standardized export.
 - `scripts/03_validation/`
   LDSC validation scripts for the native factor GWAS outputs.
+- `scripts/04_postgwas/`
+  Post-GWAS follow-up workflow for MiXeR, pleioFDR, coloc, PWCoCo, cTWAS, and SMR.
 - `docs/`
   Environment notes and execution details.
 - `results/`
@@ -72,6 +74,8 @@ The final workflow includes:
     Performs PLINK clumping for factor and `Q_SNP` signals and generates Manhattan/QQ plots.
 17. `scripts/03_validation/step28_rebuild_supplement_with_qsnp.py`
     Rebuilds supplementary tables with the `Q_SNP` summaries and clumped lead loci.
+18. `scripts/04_postgwas/README.md`
+    Documents the post-GWAS follow-up workflow, including cTWAS and SMR.
 
 ## Utility launchers
 
